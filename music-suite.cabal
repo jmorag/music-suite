@@ -557,6 +557,19 @@ executable "music-suite-examples-salient-melodic-transformations"
     ghc-options:        -fno-code
     main-is:            Score.hs
 
+executable "rows"
+    build-depends:      base,
+                        lens,
+                        containers,
+                        random,
+                        MonadRandom,
+                        music-suite,
+                        mtl,
+                        time,
+                        typed-process
+    hs-source-dirs:     examples/pieces/Rows
+    main-is:            Score.hs
+
 
 -- TODO CrawfordSeeger
 -- TODO Floaters

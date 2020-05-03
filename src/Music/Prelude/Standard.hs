@@ -37,6 +37,9 @@ module Music.Prelude.Standard
     Asp1a,
     defaultMain,
 
+    -- * For convenience in repl
+    exportLy,
+
     -- * Lens re-exports
     set,
     over,
@@ -117,6 +120,13 @@ parseLyOpts =
       _ -> Left "Lilypond layout must be one of [inline|score|big-score]"
 
 
+exportLy :: LilypondOptions -> Music -> FilePath -> IO ()
+exportLy lyOpts music path = do
+  work <- runIOExportM $ toStandardNotation music
+  (h, ly) <- runIOExportM $ toLy lyOpts work
+  let ly' = h ++ show (Text.Pretty.pretty ly)
+  -- TODO use ByteString/builders, not String?
+  writeFile path ly'
 
 defaultMain :: Music -> IO ()
 defaultMain music = do
