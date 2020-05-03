@@ -30,6 +30,12 @@ An exploration of using the computer to generate row rules instead of picking
 them myself
 -}
 
+chaotically :: (a -> a) -> a -> Row a
+chaotically fn row = do
+  rng <- getRandomR (0, 100)
+  prob <- ask
+  if prob <= rng then pure row else pure (fn row)
+
 chaos :: Row a -> Row a -> Row a
 chaos original permuted = do
   rng <- getRandomR (0, 100)
@@ -54,15 +60,17 @@ transpose_ :: [Music] -> Row [Music]
 transpose_ = \case
   [] -> pure []
   [n] -> pure [n]
-  (x : y : ns) ->
-    chaos
-      (fmap (x :) (transpose_ (y : ns)))
-      (fmap (y :) (transpose_ (x : ns)))
+  (x : y : ns) -> do
+    rng <- getRandomR (0, 100)
+    prob <- ask
+    if prob <= rng
+      then fmap (x :) (transpose_ (y : ns))
+      else fmap (y :) (transpose_ (x : ns))
 
-cycle_ :: Int -> [Music] -> Row [Music]
-cycle_ len row = do
-  n <- getRandomR (0 :: Int, len)
-  chaos (pure row) (pure . take len . drop n $ cycle row)
+cycle_ :: [Music] -> Row [Music]
+cycle_ row = do
+  n <- getRandomR (0 :: Int, 12)
+  chaotically (take 12 . drop n . cycle) row
 
 displace_ :: [Music] -> Row [Music]
 displace_ = mapM displaceSingle
@@ -70,7 +78,7 @@ displace_ = mapM displaceSingle
     displaceSingle :: Music -> Row Music
     displaceSingle n = do
       nOctaves <- getRandomR (-2, 2)
-      chaos (pure n) (pure $ over pitches' (displacePitch nOctaves) n)
+      chaotically (over pitches' (displacePitch nOctaves)) n
     displacePitch nOctaves p =
       let p' = octavesUp nOctaves p
        in if inAmbitus (comfortableRange violin) p' then p' else p
@@ -89,9 +97,7 @@ combine_ = \case
 
 random_effs :: Double -> [Music] -> Rand StdGen [Music]
 random_effs prob mus =
-  runReaderT
-    ((displace_ >=> transpose_ >=> cycle_ 12 >=> combine_) mus)
-    prob
+  runReaderT ((displace_ >=> transpose_ >=> cycle_ >=> combine_) mus) prob
 
 main :: IO ()
 main =
@@ -124,7 +130,7 @@ loop :: Double -> Int -> [Music] -> IO ()
 loop prob rowNum base = do
   music <- evalRandIO (pseq <$> random_effs prob base)
   let title_ = printf "Row: %d, Chaos: %.2f" (rowNum + 1) prob
-      allRows = music <> rcat (map pseq rows) |/ 2
+      allRows = music <> rcat (map pseq rows)
   exportLy
     (LilypondOptions LilypondBigScore)
     (title (fromString title_) $ allRows)
