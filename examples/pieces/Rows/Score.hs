@@ -36,12 +36,6 @@ chaotically fn row = do
   prob <- ask
   if prob <= rng then pure row else pure (fn row)
 
-chaos :: Row a -> Row a -> Row a
-chaos original permuted = do
-  rng <- getRandomR (0, 100)
-  prob <- ask
-  if prob <= rng then original else permuted
-
 type Row = ReaderT Double (Rand StdGen)
 
 row1, row2, row3, row4, row5, row6, row7 :: [Music]
