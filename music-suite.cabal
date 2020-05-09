@@ -571,6 +571,14 @@ executable "rows"
     hs-source-dirs:     examples/pieces/Rows
     main-is:            Score.hs
 
+executable "sibelius-violin"
+    build-depends:      base,
+                        lens,
+                        containers,
+                        music-suite,
+                        typed-process
+    hs-source-dirs:     examples/pieces/Sibelius
+    main-is:            Excerpt.hs
 
 -- TODO CrawfordSeeger
 -- TODO Floaters
