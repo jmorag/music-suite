@@ -25,6 +25,7 @@ source-repository head
 
 library
     build-depends:      base,
+                        adjunctions,
                         lens,
                         text,
                         split,
