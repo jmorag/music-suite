@@ -567,7 +567,8 @@ executable "rows"
                         music-suite,
                         mtl,
                         time,
-                        typed-process
+                        typed-process,
+                        optparse-applicative
     hs-source-dirs:     examples/pieces/Rows
     main-is:            Score.hs
 
